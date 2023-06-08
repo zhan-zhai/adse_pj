@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka-service
+  namespace: ase-ns-13
+spec:
+  ports:
+  - port: 6781
+    targetPort: 6781
+    nodePort: 32145
+    protocol: TCP
+  selector:
+    name: eureka
+  type: LoadBalancer
+  

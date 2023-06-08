@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: gateway
+  jackson:
+    time-zone: Asia/Shanghai
+  main:
+    web-application-type: reactive
+    allow-bean-definition-overriding: true
+  redis:
+    database: 0
+    host: localhost
+    port: 6379
+    password:
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+          lowerCaseServiceId: true
+      routes:
+        - id: account
+          uri: lb://account
+          predicates:
+            - Path=/api/account/**,/api/accountManagement/**
+        - id: wallet
+          uri: lb://wallet
+          predicates:
+            - Path=/api/wallet/**
+        - id: order
+          uri: lb://order
+          predicates:
+            - Path=/api/order/**,/api/address/**
+        - id: cart
+          uri: lb://shopping-cart
+          predicates:
+            - Path=/api/cart/**
+        - id: commodity
+          uri: lb://commodity
+          predicates:
+            - Path=/api/common/**,/api/commodityManagement/**
+        - id: delivery
+          uri: lb://delivery
+          predicates:
+            - Path=/api/delivery/**
+        - id: notification
+          uri: lb://notification
+          predicates:
+            - Path=/api/notification/**,/websocket/**
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:6781/eureka/
+#      defaultZone: http://eureka:6781/eureka/
+server:
+  port: 6786
+logging:
+  level:
+    org.springframework.cloud.gateway: debug

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oap
+  namespace: ase-ns-13
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oap
+      release: skywalking
+  template:
+    metadata:
+      labels:
+        app: oap
+        release: skywalking
+    spec:
+      containers:
+        - name: oap
+          image: apache/skywalking-oap-server:8.9.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 11800
+              name: grpc
+            - containerPort: 12800
+              name: rest

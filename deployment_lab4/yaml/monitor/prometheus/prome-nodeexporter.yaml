@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: ase-ns-13
+spec:
+  selector:
+    matchLabels:
+      name: node-exporter
+  template:
+    metadata:
+      labels:
+        name: node-exporter
+    spec:
+      hostNetwork: true
+      hostPID: true
+      hostIPC: true
+      containers:
+      - name: node-exporter
+        image: prom/node-exporter:v0.14.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9100
+        securityContext:
+          privileged: true
+        args:
+        - --path.procfs
+        - /host/proc
+        - --path.sysfs
+        - /host/sys
+        - --collector.filesystem.ignored-mount-points
+        - ^/(sys|proc|dev|host|etc)($|/)
+        volumeMounts:
+        - name: dev
+          mountPath: /host/dev
+        - name: proc
+          mountPath: /host/proc
+        - name: sys
+          mountPath: /host/sys
+        - name: root
+          mountPath: /rootfs
+      volumes:
+      - name: dev
+        hostPath:
+          path: /dev
+      - name: proc
+        hostPath:
+          path: /proc
+      - name: sys
+        hostPath:
+          path: /sys
+      - name: root
+        hostPath:
+          path: /

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-service
+  namespace: ase-ns-13
+spec:
+  ports:
+  - port: 15672
+    targetPort: 15672
+    nodePort: 32149
+    protocol: TCP
+  selector:
+    name: rabbitmq
+  type: LoadBalancer
+  

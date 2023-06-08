@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    name: gateway
+  name: gateway
+  namespace: ase-ns-13
+spec:
+  clusterIP: None
+  ports:
+    - name: p1
+      port: 6786
+      protocol: TCP
+      targetPort: 6786
+  selector:
+    name: gateway
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

@@ -1,0 +1,53 @@
+server:
+  port: 6788
+  servlet:
+    session:
+      timeout: 24h
+spring:
+  application:
+    name: commodity
+#  datasource:
+#    url: jdbc:mysql://${DB_URL}/superMar?createDatabaseIfNotExist=true&UseUnicode=true&characterEncoding=utf8&characterSetResults=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+#    username: ${USERNAME}
+#    password: ${PASSWORD}
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+  datasource:
+#    url: jdbc:mysql://localhost:3306/superMar-commodity?createDatabaseIfNotExist=true&UseUnicode=true&characterEncoding=utf8&characterSetResults=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    url: jdbc:mysql://localhost:3306/superMar?createDatabaseIfNotExist=true&UseUnicode=true&characterEncoding=utf8&characterSetResults=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jackson:
+    time-zone: Asia/Shanghai
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: fd.adse.commodity.utils.DefaultMySQL57Dialect
+#    show-sql: true
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+#  redis:
+#    database: 0
+#    host: ${REDIS_URL}
+#    port: 6379
+#    password:
+  redis:
+    database: 0
+    host: localhost
+    port: 6379
+    password:
+  session:
+    redis:
+      namespace: spring:session
+      flush-mode: on_save
+    store-type: redis
+    timeout: 1200s
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:6781/eureka/
+
+commodity:
+  file-store-path: e://resources/

@@ -1,0 +1,40 @@
+version: "3"
+services:
+  mysql5:
+    build: mysql/
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - /lab2/mysql:/var/lib/mysql
+    ports:
+      - 13306:3306
+    networks:
+      - mynetwork
+
+  backend:
+    depends_on:
+      - mysql5
+    build: backend/
+    restart: always
+    volumes:
+      - /lab2/resources:/resources
+    environment:
+      USERNAME: root
+      PASSWORD: password
+      DB_URL: mysql5:3306
+    ports:
+      - 9001:9001
+    networks:
+      - mynetwork
+
+  frontend:
+    depends_on:
+      - backend
+    build: frontend/
+    restart: always
+    ports:
+      - 1024:80
+    networks:
+      - mynetwork
+networks:
+  mynetwork: {}

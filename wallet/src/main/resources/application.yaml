@@ -1,0 +1,46 @@
+
+spring:
+  application:
+    name: wallet
+#  datasource:
+#    url: jdbc:mysql://${DB_URL}/superMar?createDatabaseIfNotExist=true&UseUnicode=true&characterEncoding=utf8&characterSetResults=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+#    username: ${USERNAME}
+#    password: ${PASSWORD}
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+  datasource:
+    url: jdbc:mysql://localhost:3306/superMar?createDatabaseIfNotExist=true&UseUnicode=true&characterEncoding=utf8&characterSetResults=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jackson:
+    time-zone: Asia/Shanghai
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: fd.adse.wallet.utils.DefaultMySQL57Dialect
+    show-sql: true
+#  redis:
+#    database: 0
+#    host: ${REDIS_URL}
+#    port: 6379
+#    password:
+  redis:
+    database: 0
+    host: localhost
+    port: 6379
+    password:
+
+  session:
+    redis:
+      namespace: spring:session
+      flush-mode: on_save
+    store-type: redis
+    timeout: 1200s
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:6781/eureka/
+#      defaultZone: http://eureka:6781/eureka/
+server:
+  port: 6787
+

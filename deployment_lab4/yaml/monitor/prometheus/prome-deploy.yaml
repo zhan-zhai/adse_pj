@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: prometheus
+  namespace: ase-ns-13
+  labels:
+    app: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      securityContext:
+        runAsUser: 0
+      serviceAccountName: prometheus
+      containers:
+      - image: prom/prometheus:v2.31.1
+        name: prometheus
+        imagePullPolicy: IfNotPresent
+        args:
+        - "--config.file=/etc/prometheus/prometheus.yml"
+        - "--storage.tsdb.path=/prometheus"
+        - "--storage.tsdb.retention=24h"
+        - "--web.enable-admin-api"
+        - "--web.enable-lifecycle"
+        ports:
+        - containerPort: 9090
+          name: http
+        volumeMounts:
+        - mountPath: "/etc/prometheus"
+          name: config
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 1Gi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+      volumes:
+      - name: config
+        configMap:
+          name: prometheus-config

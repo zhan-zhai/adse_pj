@@ -1,0 +1,125 @@
+version: "3"
+services:
+  redis:
+    build: redis/
+    ports:
+      - 6379:6379
+    networks:
+      - mynetwork
+
+  mysql5:
+    build: mysql/
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - /lab3/mysql:/var/lib/mysql
+    ports:
+      - 13306:3306
+    networks:
+      - mynetwork
+
+  backend:
+    depends_on:
+      - eureka
+    build: backend/
+    restart: always
+    volumes:
+      - /lab3/resources:/resources
+    environment:
+      USERNAME: root
+      PASSWORD: password
+      DB_URL: mysql5:3306
+      REDIS_URL: redis
+    ports:
+      - 6782:6782
+    networks:
+      - mynetwork
+        
+  account:
+    depends_on:
+      - backend
+    build: account/
+    restart: always
+    environment:
+      USERNAME: root
+      PASSWORD: password
+      DB_URL: mysql5:3306
+      REDIS_URL: redis
+    ports:
+      - 6785:6785
+    networks:
+      - mynetwork
+
+  eureka:
+    depends_on:
+      - mysql5
+      - redis
+    build: eureka/
+    restart: always
+    environment:
+      USERNAME: root
+      PASSWORD: password
+      DB_URL: mysql5:3306
+      REDIS_URL: redis
+    ports:
+      - 6781:6781
+    networks:
+      - mynetwork
+
+  gateway:
+    depends_on:
+      - shoppingcar
+    build: gateway/
+    restart: always
+    environment:
+      USERNAME: root
+      PASSWORD: password
+      DB_URL: mysql5:3306
+      REDIS_URL: redis
+    ports:
+      - 6786:6786
+    networks:
+      - mynetwork
+
+  order:
+    depends_on:
+      - account
+    build: order/
+    restart: always
+    environment:
+      USERNAME: root
+      PASSWORD: password
+      DB_URL: mysql5:3306
+      REDIS_URL: redis
+    ports:
+      - 6784:6784
+    networks:
+      - mynetwork
+
+  shoppingcar:
+    depends_on:
+      - order
+    build: shoppingcar/
+    restart: always
+    environment:
+      USERNAME: root
+      PASSWORD: password
+      DB_URL: mysql5:3306
+      REDIS_URL: redis
+    ports:
+      - 6783:6783
+    networks:
+      - mynetwork
+
+  frontend:
+    depends_on:
+      - backend
+    build: frontend/
+    restart: always
+    ports:
+      - 1024:80
+    networks:
+      - mynetwork
+networks:
+  mynetwork: {}
+

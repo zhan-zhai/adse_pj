@@ -1,0 +1,163 @@
+package fd.adse.commodity.controller;
+
+import com.github.wenhao.jpa.Specifications;
+import com.google.common.base.Strings;
+import fd.adse.commodity.constant.ErrorCodeConstants;
+import fd.adse.commodity.constant.RoleConstants;
+import fd.adse.commodity.dao.CommodityDao;
+import fd.adse.commodity.dao.CommodityTypeDao;
+import fd.adse.commodity.dto.GetCommodityTypeResponse;
+import fd.adse.commodity.entity.Commodity;
+import fd.adse.commodity.entity.CommodityType;
+import fd.adse.commodity.exception.ErrorCodeException;
+import fd.adse.commodity.service.CommodityService;
+import fd.adse.commodity.utils.BaseResponse;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+
+
+@RestController
+@RequestMapping("/api/commodityManagement/")
+@PreAuthorize("hasAnyRole('ROLE_SELLER','ROLE_ADMIN')")
+@Api(tags = "商品管理")
+public class CommodityController {
+
+    @Autowired
+    private CommodityDao commodityDao;
+    @Autowired
+    private CommodityTypeDao commodityTypeDao;
+    @Autowired
+    private CommodityService commodityService;
+
+    @GetMapping("/commodities_all")
+    @ApiOperation("获取所有,不分页")
+    @PreAuthorize("hasAnyRole('ROLE_SELLER','ROLE_ADMIN', 'ROLE_USER')")
+    public BaseResponse<List<Commodity>> retrieveAll(
+        @RequestParam(required = false) String name
+    ) {
+        Specification<Commodity> specification = Specifications.<Commodity>and()
+//            .eq(Strings.isNullOrEmpty(nameContain), "name", nameContain)
+//            .gt(Objects.nonNull(request.getAge()), "age", 18)
+//            .between("birthday", new Date(), new Date())
+            .like(!Strings.isNullOrEmpty(name), "name", "%" + name + "%")
+            .build();
+        return new BaseResponse(commodityDao.findAll(specification), "获取列表成功!");
+    }
+
+    @GetMapping("/commodities")
+    @ApiOperation("获取所有，分页")
+    @PreAuthorize("hasAnyRole('ROLE_SELLER','ROLE_ADMIN', 'ROLE_USER')")
+    public BaseResponse<Page<List<Commodity>>> retrieveAll(
+        @RequestParam(required = false) Long id,
+        @RequestParam(required = false) String name,
+        @RequestParam(required = false) String introduction,
+        @PageableDefault Pageable pageable
+    ) {
+        Specification<Commodity> specification = Specifications.<Commodity>and()
+//            .eq(Strings.isNullOrEmpty(nameContain), "name", nameContain)
+//            .gt(Objects.nonNull(request.getAge()), "age", 18)
+//            .between("birthday", new Date(), new Date())
+            .eq(id != null, "id", id)
+            .like(!Strings.isNullOrEmpty(name), "name", "%" + name + "%")
+            .like(!Strings.isNullOrEmpty(introduction), "introduction", "%" + name + "%")
+            .build();
+        return new BaseResponse(commodityDao.findAll(specification, pageable), "获取列表成功!");
+    }
+
+    @GetMapping("/commodities/{id}")
+    @ApiOperation("获取单个")
+    public BaseResponse<Commodity> retrieve(@PathVariable long id) {
+        Optional<Commodity> o = commodityDao.findById(id);
+        if (!o.isPresent()) {
+            throw new ErrorCodeException(ErrorCodeConstants.YZ_401);
+        }
+        return new BaseResponse<>(o.get(), "获取实体成功！");
+    }
+
+    @DeleteMapping("/commodities/{id}")
+    @ApiOperation("删除")
+    @PreAuthorize("hasAnyRole('ROLE_SELLER','ROLE_ADMIN')")
+    public BaseResponse delete(@PathVariable long id) {
+        commodityDao.deleteById(id);
+        return new BaseResponse("删除实体成功！");
+    }
+
+    @PostMapping("/commodities")
+    @ApiOperation("新增")
+    @PreAuthorize("hasAnyRole('ROLE_SELLER','ROLE_ADMIN')")
+    public BaseResponse<Commodity> create(@RequestBody Commodity o, HttpServletRequest request) {
+        String auth = (String) request.getSession().getAttribute("authority");
+        Commodity commodity;
+        if(auth.equals(RoleConstants.SELLER)){
+            Long userId = (Long) request.getSession().getAttribute("userId");
+            commodity = new Commodity(o.getName(),o.getIntroduction(),userId);
+        }
+        else
+            commodity = new Commodity(o.getName(),o.getIntroduction(),o.getSellerId());
+        commodityDao.save(commodity);
+        Set<CommodityType> commodityTypes = o.getCommodityTypes();
+        for(CommodityType type :commodityTypes){
+            CommodityType commodityType = new CommodityType(type.getType(),type.getImage(),type.getAmount(),type.getPrice(),commodity);
+            commodityTypeDao.save(commodityType);
+        }
+
+        return new BaseResponse<>(commodity, "新增实体成功！");
+    }
+
+    @PutMapping("/commodities/{id}")
+    @ApiOperation("修改")
+    @PreAuthorize("hasAnyRole('ROLE_SELLER','ROLE_ADMIN')")
+    public BaseResponse<Commodity> update(@RequestBody Commodity o, @PathVariable long id) {
+
+        Optional<Commodity> oOptional = commodityDao.findById(id);
+        if (!oOptional.isPresent()) {
+            throw new ErrorCodeException(ErrorCodeConstants.YZ_401);
+        }
+        o.setId(id);
+        Set<CommodityType> commodityTypes = o.getCommodityTypes();
+        for(CommodityType type :commodityTypes){
+            type.setCommodity(o);
+        }
+        return new BaseResponse<>(commodityDao.save(o), "修改实体成功！");
+    }
+
+    @GetMapping("/commodityType/{id}")
+    @ApiOperation("获取商品类型信息")
+    @PreAuthorize("hasAnyRole('ROLE_SELLER','ROLE_ADMIN', 'ROLE_USER')")
+    public BaseResponse<GetCommodityTypeResponse> getCommodityType(@PathVariable Long id){
+        return new BaseResponse<>(commodityService.getCommodityType(id));
+    }
+
+    @PutMapping("/orderCommodityType/{id}/{quantity}")
+    @ApiOperation("下单减少商品库存")
+    @PreAuthorize("hasAnyRole('ROLE_SELLER','ROLE_ADMIN', 'ROLE_USER')")
+    public BaseResponse<String> decreaseCommodityType(@PathVariable Long id,@PathVariable int quantity){
+        return new BaseResponse<>(commodityService.decreaseCommodityType(id,quantity));
+    }
+
+    @PutMapping("/orderCancelled/{id}/{quantity}")
+    BaseResponse<String> cancelOrder(@PathVariable Long id,@PathVariable int quantity){
+       return new BaseResponse<>(commodityService.cancelOrder(id,quantity));
+    }
+}

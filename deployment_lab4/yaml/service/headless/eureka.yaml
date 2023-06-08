@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    name: eureka
+  name: eureka
+  namespace: ase-ns-13
+spec:
+  clusterIP: None
+  ports:
+    - name: p1
+      port: 6781
+      protocol: TCP
+      targetPort: 6781
+  selector:
+    name: eureka
+  sessionAffinity: None
+  type: ClusterIP

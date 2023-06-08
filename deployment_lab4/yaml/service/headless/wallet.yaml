@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    name: wallet
+  name: wallet
+  namespace: ase-ns-13
+spec:
+  clusterIP: None
+  ports:
+    - name: p1
+      port: 6787
+      protocol: TCP
+      targetPort: 6787
+  selector:
+    name: wallet
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

@@ -1,0 +1,5 @@
+FROM rabbitmq:3.9.10-management
+
+ENV RABBITMQ_DEFAULT_USER admin
+
+ENV RABBITMQ_DEFAULT_PASS admin

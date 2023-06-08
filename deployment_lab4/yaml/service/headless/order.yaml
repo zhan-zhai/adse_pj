@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    name: order
+  name: order
+  namespace: ase-ns-13
+spec:
+  clusterIP: None
+  ports:
+    - name: p1
+      port: 6784
+      protocol: TCP
+      targetPort: 6784
+  selector:
+    name: order
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    name: delivery
+  name: delivery
+  namespace: ase-ns-13
+spec:
+  clusterIP: None
+  ports:
+    - name: p1
+      port: 6789
+      protocol: TCP
+      targetPort: 6789
+  selector:
+    name: delivery
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

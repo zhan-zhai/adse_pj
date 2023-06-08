@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  name: eureka
+  namespace: ase-ns-13
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: eureka
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name: eureka
+    spec:
+      containers:
+      - name: eureka
+        image: 'zfhub/lab4_eureka:v1.0'
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 6781
+            protocol: TCP
+        resources:
+          limits:
+            memory: 1Gi
+          requests:
+            memory: 1Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      hostname: eureka
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
